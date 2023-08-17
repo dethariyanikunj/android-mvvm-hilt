@@ -6,6 +6,7 @@ on:
 
 jobs:
   lint:
+    name: Run Android Lint check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
@@ -17,9 +18,11 @@ jobs:
       - name: Upload html test report
         uses: actions/upload-artifact@v2
         with:
-          name: index.html
+          name: lint_report
           path: app/build/reports/lint-results-debug.html
   unit-test:
+    name: Run Android Unit Test cases
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -29,3 +32,20 @@ jobs:
         with:
           name: unit_test_report
           path: app/build/reports/tests/testDebugUnitTest/
+  instrumentation-test:
+    name: Run Android Instrumented (UI) test cases
+    needs: [unit-test]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: chmod +x ./gradlew
+      - name: Run espresso tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedCheck
+      - name: Upload test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: instrumentation_test_report
+          path: app/build/reports/androidTests/connected/
