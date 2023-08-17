@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
-      - name: Make gradle excutable - As Github Action is giving Permission Issue
+      - name: Make gradle excutable - Github Action Permission Issue
         run: chmod +x ./gradlew
       - name: Run Lint
         run: ./gradlew lintDebug
@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: chmod +x ./gradlew
       - run: ./gradlew test
       - uses: actions/upload-artifact@v2
         with:
