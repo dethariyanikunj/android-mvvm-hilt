@@ -5,84 +5,84 @@ on:
       - main
 
 jobs:
-#  lint:
-#    name: Run Android Lint check
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout the code
-#        uses: actions/checkout@v2
-#      - name: Make gradle excutable - Github Action Permission Issue
-#        run: chmod +x ./gradlew
-#      - name: Run Lint
-#        run: ./gradlew lintDebug
-#      - name: Upload html test report
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: lint_report
-#          path: app/build/reports/lint-results-debug.html
-#  unit-test:
-#    name: Run Android Unit Test cases
-#    needs: [ lint ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - run: chmod +x ./gradlew
-#      - run: ./gradlew test
-#      - uses: actions/upload-artifact@v2
-#        with:
-#          name: unit_test_report
-#          path: app/build/reports/tests/testDebugUnitTest/
-#  instrumentation-test:
-#    name: Run Android Instrumented (UI) test cases
-#    needs: [ unit-test ]
-#    runs-on: macos-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: set up Java 11 as Hilt required it at runtime
-#        uses: actions/setup-java@v1
-#        with:
-#          # Added distribution as it was giving Error: Input required and not supplied: distribution
-#          # Ref. https://github.com/actions/setup-java
-#          distribution: 'temurin'
-#          java-version: '11'
-#      - run: chmod +x ./gradlew
-#      - name: Run espresso tests
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: 29
-#          script: ./gradlew connectedCheck
-#      - name: Upload test report
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: instrumentation_test_report
-#          path: app/build/reports/androidTests/connected/
-#  static-code-analysis:
-#    name: Run static code analysis with Sonar cloud
-#    needs: [ instrumentation-test ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: set up jdk 17 as sonar required min jdk 17
-#        uses: actions/setup-java@v1
-#        with:
-#          distribution: 'temurin'
-#          java-version: '17'
-#      - run: chmod +x ./gradlew
-#        # sonar token will take from github > settings > security > secrets and variable
-#        # Link Sonar cloud with Github account check below video to do so:
-#        # Ref. https://www.youtube.com/watch?v=ydRhDYhw3i0
-#      - name: SonarCloud scan
-#        run: ./gradlew app:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-#        env:
-#          GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }} # Already available with Github actions
+  lint:
+    name: Run Android Lint check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+      - name: Make gradle excutable - Github Action Permission Issue
+        run: chmod +x ./gradlew
+      - name: Run Lint
+        run: ./gradlew lintDebug
+      - name: Upload html test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: lint_report
+          path: app/build/reports/lint-results-debug.html
+  unit-test:
+    name: Run Android Unit Test cases
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: chmod +x ./gradlew
+      - run: ./gradlew test
+      - uses: actions/upload-artifact@v2
+        with:
+          name: unit_test_report
+          path: app/build/reports/tests/testDebugUnitTest/
+  instrumentation-test:
+    name: Run Android Instrumented (UI) test cases
+    needs: [ unit-test ]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up Java 11 as Hilt required it at runtime
+        uses: actions/setup-java@v3
+        with:
+          # Added distribution as it was giving Error: Input required and not supplied: distribution
+          # Ref. https://github.com/actions/setup-java
+          distribution: 'temurin'
+          java-version: '11'
+      - run: chmod +x ./gradlew
+      - name: Run espresso tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedCheck
+      - name: Upload test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: instrumentation_test_report
+          path: app/build/reports/androidTests/connected/
+  static-code-analysis:
+    name: Run static code analysis with Sonar cloud
+    needs: [ instrumentation-test ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up jdk 17 as sonar required min jdk 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - run: chmod +x ./gradlew
+        # sonar token will take from github > settings > security > secrets and variable
+        # Link Sonar cloud with Github account check below video to do so:
+        # Ref. https://www.youtube.com/watch?v=ydRhDYhw3i0
+      - name: SonarCloud scan
+        run: ./gradlew app:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        env:
+          GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }} # Already available with Github actions
   build-apk:
     name: Generate Debug APK
-#    needs: [ static-code-analysis ]
+    needs: [ static-code-analysis ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: set up jdk 17 as sonar required min jdk
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
