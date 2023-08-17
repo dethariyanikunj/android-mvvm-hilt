@@ -22,7 +22,7 @@ jobs:
           path: app/build/reports/lint-results-debug.html
   unit-test:
     name: Run Android Unit Test cases
-    needs: [lint]
+    needs: [ lint ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
           path: app/build/reports/tests/testDebugUnitTest/
   instrumentation-test:
     name: Run Android Instrumented (UI) test cases
-    needs: [unit-test]
+    needs: [ unit-test ]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -54,7 +54,7 @@ jobs:
           name: instrumentation_test_report
           path: app/build/reports/androidTests/connected/
   static-code-analysis:
-    needs: [instrumentation-test]
+    needs: [ instrumentation-test ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -63,10 +63,10 @@ jobs:
         with:
           java-version: '11'
       - run: chmod +x ./gradlew
+        # sonar token will take from github > settings > security > secrets and variable
+        # Link Sonar cloud with Github account check below video to do so:
+        # Ref. https://www.youtube.com/watch?v=ydRhDYhw3i0ō
       - name: SonarCloud scan
-          # sonar token will take from github > settings > security > secrets and variable
-          # Link Sonar cloud with Github account check below video to do so:
-          # Ref. https://www.youtube.com/watch?v=ydRhDYhw3i0
-          run: ./gradlew app:sonarqube -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-          env:
-            GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }} # Already available with Github actions
+        run: ./gradlew app:sonarqube -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        env:
+          GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }} # Already available with Github actions
